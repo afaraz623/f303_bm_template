@@ -12,7 +12,7 @@
             "device": "STM32F303VC",
             "interface": "swd",
             "serialNumber": "774398515", // Debugger serial number
-            "runToEntryPoint": "main",
+            //"runToEntryPoint": "main",
             "preLaunchTask": "Build",
             "svdFile": "./STM32F303.svd", // Include svd to watch device peripherals
         }
