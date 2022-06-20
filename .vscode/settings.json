@@ -2,6 +2,8 @@
     "cortex-debug.gdbPath": "/usr/local/bin/arm-none-eabi-gdb",
     "cortex-debug.JLinkGDBServerPath": "/usr/local/bin/JLinkGDBServer",
     "files.associations": {
-        "main.h": "c"
+        "main.h": "c",
+        "stm32f3xx.h": "c",
+        "stm32f303xc.h": "c"
     }
 }
