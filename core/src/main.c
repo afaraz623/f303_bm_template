@@ -33,5 +33,6 @@ int main(void)
         }   
     }
     
+	NVIC_SystemReset();
     return 0;
 }

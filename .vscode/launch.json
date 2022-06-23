@@ -7,7 +7,7 @@
             "request": "launch",
             "name": "Debug Jlink",
             "cwd": "${workspaceRoot}",
-            "executable": "./build/f303_blinky_bm.elf",
+            "executable": "./build/firmware.elf",
             "servertype": "jlink",
             "device": "STM32F303VC",
             "interface": "swd",

@@ -4,6 +4,7 @@
     "files.associations": {
         "main.h": "c",
         "stm32f3xx.h": "c",
-        "stm32f303xc.h": "c"
+        "stm32f303xc.h": "c",
+        "system_stm32f3xx.h": "c"
     }
 }
