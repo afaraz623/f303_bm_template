@@ -1,148 +1,131 @@
 OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
-ENTRY(Reset_Handler)	/* Entry Point */
+ENTRY(Reset_Handler) /* entry Point */
 
-/* Highest address of the user mode stack */
-_estack = ORIGIN(CCMRAM) + LENGTH(CCMRAM);    /* end of RAM */
+MEMORY { /* memory map of Tiva TM4C123GH6PM */
+    RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 40K
+	CCMRAM (xrw) : ORIGIN = 0x10000000, LENGTH = 8K
+    ROM (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
 
-/* Generate a link error if heap and stack don't fit into RAM */
-_Min_Heap_Size = 0x10;      /* required amount of heap  */
-_Min_Stack_Size = 0x400; /* required amount of stack */
-
-/* Specify the memory areas */
-MEMORY
-{
-	RAM (xrw)      : ORIGIN = 0x20000000, LENGTH = 40K
-	CCMRAM (xrw)      : ORIGIN = 0x10000000, LENGTH = 8K
-	FLASH (rx)      : ORIGIN = 0x8000000, LENGTH = 256K
 }
 
-/* Define output sections */
-SECTIONS
+/* The size of the stack used by the application. NOTE: you need to adjust  */
+STACK_SIZE = 1024;
+
+/* The size of the heap used by the application. NOTE: you need to adjust   */
+HEAP_SIZE = 16;
+
+SECTIONS 
 {
-  /* The startup code goes first into FLASH */
-  .isr_vector :
-  {
-    KEEP(*(.isr_vector)) /* Startup code */
-    . = ALIGN(4);
-  } >FLASH
+    .isr_vector : {        /* the vector table goes FIRST into ROM */
+        KEEP(*(.isr_vector)) /* vector table */
+        . = ALIGN(4);
+    } >ROM
 
-  /* The program code and other data goes into FLASH */
-  .text :
-  {
-    . = ALIGN(4);
-    
-	*(.text)           /* .text sections (code) */
-    *(.text*)          /* .text* sections (code) */
-    *(.rodata)         /* .rodata sections (constants, strings, etc.) */
-    *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
+    .text : {              /* code and constants */
+        . = ALIGN(4);
+        *(.text)           /* .text sections (code) */
+        *(.text*)          /* .text* sections (code) */
+        *(.rodata)         /* .rodata sections (constants, strings, etc.) */
+        *(.rodata*)        /* .rodata* sections (constants, strings, etc.) */
 
-    KEEP (*(.init))
-    KEEP (*(.fini))
+        KEEP (*(.init))
+        KEEP (*(.fini))
 
-    . = ALIGN(4);
-  } >FLASH
+        . = ALIGN(4);
+    } >ROM
 
-  .preinit_array     :
-  {
-    PROVIDE_HIDDEN (__preinit_array_start = .);
-    KEEP (*(.preinit_array*))
-    PROVIDE_HIDDEN (__preinit_array_end = .);
-  } >FLASH
- 
-  .init_array :
-  {
-    PROVIDE_HIDDEN (__init_array_start = .);
-    KEEP (*(SORT(.init_array.*)))
-    KEEP (*(.init_array*))
-    PROVIDE_HIDDEN (__init_array_end = .);
-  } >FLASH
-  
-  .fini_array :
-  {
-    PROVIDE_HIDDEN (__fini_array_start = .);
-    KEEP (*(SORT(.fini_array.*)))
-    KEEP (*(.fini_array*))
-    PROVIDE_HIDDEN (__fini_array_end = .);
-  } >FLASH
+	/* .ARM.extab : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
+  	
+	.ARM : {
+    	__exidx_start = .;
+    	*(.ARM.exidx*)
+    	__exidx_end = .;
+  	} >ROM */
 
-  _etext = .;            /* global symbols at end of code */
-  
-  .ARM.extab : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >FLASH
-  
-  .ARM : 
-  {
-    __exidx_start = .;
-    *(.ARM.exidx*)
-    __exidx_end = .;
-  } >FLASH
+    .preinit_array : {
+        PROVIDE_HIDDEN (__preinit_array_start = .);
+        KEEP (*(.preinit_array*))
+        PROVIDE_HIDDEN (__preinit_array_end = .);
+    } >ROM
 
-  
-  /* CCM-RAM section 
-  * 
-  * IMPORTANT NOTE! 
-  * If initialized variables will be placed in this section,
-  * the startup code needs to be modified to copy the init-values.  
-  */
-  .ccmram :
-  {
-  	_siccmram = LOADADDR(.ccmram);
-    . = ALIGN(4);
-    _sccmram = .;       /* create a global symbol at ccmram start */
-    *(.ccmram)
-    *(.ccmram*)
-    
-    . = ALIGN(4);
-    _eccmram = .;       /* create a global symbol at ccmram end */
-  } >CCMRAM AT> FLASH
+    .init_array : {
+        PROVIDE_HIDDEN (__init_array_start = .);
+        KEEP (*(SORT(.init_array.*)))
+        KEEP (*(.init_array*))
+        PROVIDE_HIDDEN (__init_array_end = .);
+    } >ROM
 
-  /* User_heap_stack section, used to check that there is enough RAM left */
-  ._user_heap_stack :
-  {
-    . = ALIGN(8);
-    PROVIDE ( end = . );
-    PROVIDE ( _end = . );
-    . = . + _Min_Heap_Size;
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-  } >CCMRAM
-  
-  /* Initialized data sections goes into RAM, load LMA copy after code */
-  .data : AT (_etext)
-  {
-  	_sidata = LOADADDR(.data);
-    . = ALIGN(4);
-    _sdata = .;        /* create a global symbol at data start */
-    *(.data)           /* .data sections */
-    *(.data*)          /* .data* sections */
+    .fini_array : {
+        PROVIDE_HIDDEN (__fini_array_start = .);
+        KEEP (*(.fini_array*))
+        KEEP (*(SORT(.fini_array.*)))
+        PROVIDE_HIDDEN (__fini_array_end = .);
+    } >ROM
 
-    . = ALIGN(4);
-    _edata = .;        /* define a global symbol at data end */
-  } >RAM
+    _etext = .;            /* global symbols at end of code */
 
-  /* Uninitialized data section */
-  .bss :
-  {
-    /* This is used by the startup in order to initialize the .bss secion */
-    _sbss = .;         /* define a global symbol at bss start */
-    __bss_start__ = _sbss;
-    *(.bss)
-    *(.bss*)
-    *(COMMON)
-    . = ALIGN(4);
-    _ebss = .;         /* define a global symbol at bss end */
-    __bss_end__ = _ebss;
-  } >RAM
+    .stack : {
+        __stack_start__ = .;
+        . = . + STACK_SIZE;
+        . = ALIGN(4);
+        __stack_end__ = .;
+    } >RAM
 
-  /* Remove information from the standard libraries */
-  /DISCARD/ :
-  {
-    libc.a ( * )
-    libm.a ( * )
-    libgcc.a ( * )
-  }
+    .data :  AT (_etext) {
+        __data_load = LOADADDR (.data);
+        __data_start = .;
+        *(.data)           /* .data sections */
+        *(.data*)          /* .data* sections */
+        . = ALIGN(4);
+        __data_end__ = .;
+        _edata = __data_end__;
+    } >RAM
 
-  .ARM.attributes 0 : { *(.ARM.attributes) }
+    .bss : {
+        __bss_start__ = .;
+        *(.bss)
+        *(.bss*)
+        *(COMMON)
+        . = ALIGN(4);
+        _ebss = .;         /* define a global symbol at bss end */
+        __bss_end__ = .;
+    } >RAM
+
+    PROVIDE ( end = _ebss );
+    PROVIDE ( _end = _ebss );
+    PROVIDE ( __end__ = _ebss );
+
+    .heap : {
+        __heap_start__ = .;
+        . = . + HEAP_SIZE;
+        . = ALIGN(4);
+        __heap_end__ = .;
+    } >RAM
+
+	_siccmram = LOADADDR(.ccmram);
+
+	/* CCM-RAM section 
+	* 
+	* IMPORTANT NOTE! 
+	* If initialized variables will be placed in this section,
+	* the startup code needs to be modified to copy the init-values.  
+	*/
+	.ccmram :
+	{
+		. = ALIGN(4);
+		_sccmram = .;       /* create a global symbol at ccmram start */
+		*(.ccmram)
+		*(.ccmram*)
+		
+		. = ALIGN(4);
+		_eccmram = .;       /* create a global symbol at ccmram end */
+	} >CCMRAM AT> ROM
+
+    /* Remove information from the standard libraries */
+    /DISCARD/ : {
+        libc.a ( * )
+        libm.a ( * )
+        libgcc.a ( * )
+    }
 }
-
-
