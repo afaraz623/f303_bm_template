@@ -1,4 +1,4 @@
-/* Board support source file consisting of board specific peripheral initialization & other functional definitions */
+/* Board support source file consists of board specific peripheral initialization & other functional definitions */
 #include <stdint.h>
 #include <stm32f3xx.h>
 #include <board_support.h>
@@ -20,11 +20,14 @@ void BS_init(void)
     // gpioe on and set pins to gp output
     RCC->AHBENR |= RCC_AHBENR_GPIOEEN;
 
-	GPIOE->MODER |= GPIO_MODER_MODER8_0 | GPIO_MODER_MODER9_0;
-	
+	GPIOE->MODER |= GPIO_MODER_MODER8_0 | GPIO_MODER_MODER9_0 | GPIO_MODER_MODER10_0 | GPIO_MODER_MODER11_0;
+}
+
+void BS_irqStartup(void)
+{
     SysTick_Config(SystemCoreClock / TICKS_PER_MS); 
 
-    NVIC_SetPriority(SysTick_IRQn, 0U); // set systick priority to the lowest
+    NVIC_SetPriority(SysTick_IRQn, 0U); // set systick priority to above pendsv irq
 	__enable_irq();
 }
 

@@ -2,8 +2,15 @@
 #include <miros.h>
 #include <stm32f3xx.h>
 
+#define MAX_THREADS 32
+
 OSThread * volatile OSCurr; // current thread
 OSThread * volatile OSNext; // next thread
+OSThread *OSThreadArray[MAX_THREADS + 1]; // to keep track of running threads
+uint8_t num_threads; // number of threads started so far
+uint8_t cur_thread_idx;
+
+__attribute__((naked)) void assert_failed (char const *file, int line);
 
 void osInit(void)
 {
@@ -13,15 +20,12 @@ void osInit(void)
 
 void osSched(void)
 {
-    extern OSThread blinky1;
-    extern OSThread blinky2;
-    
-    if(OSCurr == &blinky1)
-    {
-        OSNext = &blinky2;
-    }else{
-        OSNext = &blinky1;
-    }
+    ++cur_thread_idx;
+
+    if(cur_thread_idx == num_threads)
+        cur_thread_idx = 0U;
+
+    OSNext = OSThreadArray[cur_thread_idx];
 
     if(OSCurr != OSNext)
         *(uint32_t volatile *)0XE000ED04 = (1U << 28); // trigger pendsv irq
@@ -62,6 +66,15 @@ void osThreadStart(OSThread *me, osThreadHandler thread_handler, void *stk_sto, 
     {
         *sp = 0xDEADBEEFU;
     }
+
+    if(num_threads < MAX_THREADS)
+    {
+        OSThreadArray[num_threads] = me;
+        ++num_threads;
+    }
+    else
+        assert_failed("Number of threads exceeded", __LINE__);
+    
 }
 
 __attribute__ ((naked, optimize("-fno-stack-protector")))
