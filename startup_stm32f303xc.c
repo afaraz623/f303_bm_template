@@ -212,7 +212,6 @@ void Reset_Handler(void) {
     unsigned const *src;
     unsigned *dst;
 
-
     /* copy the data segment initializers from flash to RAM... */
     src = &__data_load;
     for (dst = &__data_start; dst < &__data_end__; ++dst, ++src) {

@@ -2,14 +2,6 @@
 # Makefile for stm32f303vc cmsis bare metal project  
 ##########################################################################################################################
 
-# ------------------------------------------------
-# Generic Makefile (based on gcc)
-#
-# ChangeLog :
-#	2017-02-10 - Several enhancements + project update mode
-#   2015-07-22 - first version
-# ------------------------------------------------
-
 ######################################
 # target
 ######################################
@@ -31,13 +23,16 @@ OPT = -Og
 # Build path
 BUILD_DIR = build
 
+
 ######################################
 # source
 ######################################
 # C sources
 C_SOURCES =  \
-core/src/main.c \
-core/src/system_stm32f3xx.c \
+Core/src/main.c \
+Core/src/miros.c \
+Core/src/board_support.c \
+Core/src/system_stm32f3xx.c \
 startup_stm32f303xc.c
 
 # ASM sources
@@ -93,8 +88,8 @@ C_DEFS =  \
 AS_INCLUDES = 
 
 # C includes
-C_INCLUDES =  \
--Icore/inc \
+C_INCLUDES = \
+-ICore/inc \
 -ICMSIS/Device/ST/STM32F3xx/Include \
 -ICMSIS/Include
 

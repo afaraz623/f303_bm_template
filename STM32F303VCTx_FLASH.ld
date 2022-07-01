@@ -2,11 +2,10 @@ OUTPUT_FORMAT("elf32-littlearm", "elf32-bigarm", "elf32-littlearm")
 OUTPUT_ARCH(arm)
 ENTRY(Reset_Handler) /* entry Point */
 
-MEMORY { /* memory map of Tiva TM4C123GH6PM */
+MEMORY { /* memory map of STM32F303VCT6 */
     RAM (xrw) : ORIGIN = 0x20000000, LENGTH = 40K
 	CCMRAM (xrw) : ORIGIN = 0x10000000, LENGTH = 8K
-    ROM (rx)  : ORIGIN = 0x00000000, LENGTH = 256K
-
+    ROM (rx)  : ORIGIN = 0x8000000, LENGTH = 256K
 }
 
 /* The size of the stack used by the application. NOTE: you need to adjust  */
@@ -34,14 +33,6 @@ SECTIONS
 
         . = ALIGN(4);
     } >ROM
-
-	/* .ARM.extab : { *(.ARM.extab* .gnu.linkonce.armextab.*) } >ROM
-  	
-	.ARM : {
-    	__exidx_start = .;
-    	*(.ARM.exidx*)
-    	__exidx_end = .;
-  	} >ROM */
 
     .preinit_array : {
         PROVIDE_HIDDEN (__preinit_array_start = .);
