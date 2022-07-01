@@ -13,6 +13,16 @@ void osInit(void)
 
 void osSched(void)
 {
+    extern OSThread blinky1;
+    extern OSThread blinky2;
+    
+    if(OSCurr == &blinky1)
+    {
+        OSNext = &blinky2;
+    }else{
+        OSNext = &blinky1;
+    }
+
     if(OSCurr != OSNext)
         *(uint32_t volatile *)0XE000ED04 = (1U << 28); // trigger pendsv irq
 }

@@ -7,5 +7,6 @@
         "stm32f303xc.h": "c",
         "system_stm32f3xx.h": "c",
         "core_cm4.h": "c"
-    }
+    },
+    "cortex-debug.variableUseNaturalFormat": false
 }
