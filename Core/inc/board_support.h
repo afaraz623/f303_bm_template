@@ -12,6 +12,4 @@ void BS_irqStartup(void);
 
 void BS_gpioToggle(GPIO_TypeDef *gpiox, uint32_t gpio_pin);
 
-void BS_delay(uint32_t ticks);
-
 #endif
